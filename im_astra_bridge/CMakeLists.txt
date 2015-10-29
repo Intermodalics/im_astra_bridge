@@ -4,7 +4,7 @@
 # Copyright: malte.ahl@intermodalics.eu
 
 cmake_minimum_required(VERSION 2.8.3)
-project(astra_bridge)
+project(im_astra_bridge)
 
 
 # Check c++11 / c++0x support.
@@ -51,18 +51,18 @@ include_directories(
 )
 
 ## Declare a C++ executable
-add_executable(astra_bridge_node 
-    src/astra_bridge_node.cpp
+add_executable(im_astra_bridge_node 
+    src/im_astra_bridge_node.cpp
     )
 
 ## Add cmake target dependencies.
-add_dependencies(astra_bridge_node 
+add_dependencies(im_astra_bridge_node 
     ${${PROJECT_NAME}_EXPORTED_TARGETS} 
     ${catkin_EXPORTED_TARGETS}
 )
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(astra_bridge_node
+target_link_libraries(im_astra_bridge_node
    ${catkin_LIBRARIES}
    ${ASTRA_LIBRARIES}
  )

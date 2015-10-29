@@ -1,0 +1,4 @@
+<launch>
+  <node name="im_astra_bridge_node" pkg="im_astra_bridge"
+    type="im_astra_bridge_node"/>
+</launch>
