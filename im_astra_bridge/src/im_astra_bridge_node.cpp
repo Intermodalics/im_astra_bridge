@@ -12,7 +12,9 @@
 #include <ros/publisher.h>
 #include <string>
 
-typedef pcl::PointCloud<pcl::PointXYZ>::Ptr PclPointCloud;
+#include "im_astra_bridge/fov_filter.h"
+
+typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr PclPointCloud;
 typedef sensor_msgs::PointCloud2::Ptr RosPointCloud;
 
 class PointFrameListener : public astra::FrameReadyListener {
@@ -77,6 +79,13 @@ int main(int argc, char **argv) {
   ros::Publisher cloud_pub = 
     n.advertise<sensor_msgs::PointCloud2>("depth/points", 1);
 
+  // Define the field of view (for the short range)
+  fov_filter::field_of_view fov;
+  fov.angle_xz = M_PI * 60 / 180;
+  fov.angle_yz = M_PI * 50 / 180;
+  fov.min_depth_range = 0.3;
+  fov.max_depth_range = 0.6;
+
   // Set the loop rate.
   ros::Rate loop_rate(30);
 
@@ -88,7 +97,7 @@ int main(int argc, char **argv) {
     astra_temp_update();
 
     // Create new point cloud.
-    PclPointCloud cloud (new pcl::PointCloud<pcl::PointXYZ>);
+    PclPointCloud cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
     cloud->header.frame_id = "base_link";
     const size_t width = listener.width;
     const size_t height = listener.height;
@@ -110,6 +119,10 @@ int main(int argc, char **argv) {
         cloud->points[(y * width + x)].z = (*pointData).z / 1000.0;
       }
     }
+
+    // Remove points outside of the camera's field-of-view
+    fov_filter::removePointsOutsideFieldOfView(fov, 0.0, cloud);
+
     // Convert to sensormsg::Pointcloud2 type.
     RosPointCloud final_cloud (new sensor_msgs::PointCloud2);
     pcl::toROSMsg(*cloud, *final_cloud);
