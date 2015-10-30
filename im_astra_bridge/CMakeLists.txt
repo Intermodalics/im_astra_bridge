@@ -23,14 +23,14 @@ list(APPEND
   CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/config
 )
 ## Find catkin macros and libraries
-find_package(catkin REQUIRED COMPONENTS
-  pcl_conversions
-  pcl_ros
+find_package(catkin REQUIRED COMPONENTS  
   roscpp
-  std_msgs
+  sensor_msgs
 )
 
-## System dependencies are found with CMake's conventions
+## Third-party packages ##
+find_package(PCL REQUIRED)
+find_package(orocos_kdl REQUIRED)
 find_package(Astra REQUIRED)
 
 if(NOT ASTRA_ROOT)
@@ -38,7 +38,7 @@ if(NOT ASTRA_ROOT)
   return()
 endif()
 
-catkin_package()
+catkin_package(INCLUDE_DIRS include LIBRARIES fov_checker_functions) 
 
 ###########
 ## Build ##
@@ -46,23 +46,35 @@ catkin_package()
 
 ## Specify additional locations of header files
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
+  ${orocos_kdl_INCLUDE_DIRS}
   ${ASTRA_INCLUDE_DIR}
+)
+
+## Declare a C++ library and link with its dependencies
+add_library(fov_filter src/fov_filter.cpp )
+
+target_link_libraries(fov_filter
+   ${catkin_LIBRARIES}
+   ${PCL_LIBRARIES}
+   ${orocos_kdl_LIBRARIES}
 )
 
 ## Declare a C++ executable
 add_executable(im_astra_bridge_node 
     src/im_astra_bridge_node.cpp
-    )
+)
 
 ## Add cmake target dependencies.
 add_dependencies(im_astra_bridge_node 
-    ${${PROJECT_NAME}_EXPORTED_TARGETS} 
     ${catkin_EXPORTED_TARGETS}
 )
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(im_astra_bridge_node
    ${catkin_LIBRARIES}
+   fov_filter
    ${ASTRA_LIBRARIES}
- )
+)
