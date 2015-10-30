@@ -6,9 +6,9 @@ double distancePointToPlane(const KDL::Vector& point_on_plane,
                             const KDL::Vector& plane_normal,
                             const pcl::PointXYZRGB& point){
     KDL::Vector n = plane_normal / plane_normal.Norm();
-    return n.x() * (point_on_plane.x() - point.x) +
-           n.y() * (point_on_plane.y() - point.y) +
-           n.z() * (point_on_plane.z() - point.z);
+    return n.x() * (point.x - point_on_plane.x()) +
+           n.y() * (point.y - point_on_plane.y()) +
+           n.z() * (point.z - point_on_plane.z());
 }
 
 
@@ -21,31 +21,29 @@ void removePointsOutsideFieldOfView(const field_of_view& fov,
     KDL::Vector n_xz_pos(-cos(fov.angle_xz / 2.0), 0, -sin(fov.angle_xz / 2.0));
     KDL::Vector n_yz_neg(0, -cos(fov.angle_yz / 2.0), -sin(fov.angle_yz / 2.0));
     KDL::Vector n_yz_pos(0, cos(fov.angle_yz / 2.0), -sin(fov.angle_yz / 2.0));
-    KDL::Vector n_min_range(0.0, 0.0, -1.0);
-    KDL::Vector n_max_range(0.0, 0.0, 1.0);
 
-    // FOV Plane Points.
+    // FOV Plane Point.
     KDL::Vector p_origin(0.0, 0.0, 0.0);
-    KDL::Vector p_min_range(0.0, 0.0, fov.min_depth_range);
-    KDL::Vector p_max_range(0.0, 0.0, fov.max_depth_range);
 
+    unsigned int counter =0;
+    unsigned int counter_nan = 0;
     for (unsigned int j = 0; j < cloud->points.size(); ++j) {
       // Check if the point respects the opening angle limitations.
-      if (distancePointToPlane(p_origin, n_xz_neg, cloud->points[j]) > -margin
-       || distancePointToPlane(p_origin, n_xz_pos, cloud->points[j]) > -margin
-       || distancePointToPlane(p_origin, n_yz_neg, cloud->points[j]) > -margin
-       || distancePointToPlane(p_origin, n_yz_pos, cloud->points[j]) > -margin)
+      if (distancePointToPlane(p_origin, n_xz_neg, cloud->points[j]) > margin
+       || distancePointToPlane(p_origin, n_xz_pos, cloud->points[j]) > margin
+       || distancePointToPlane(p_origin, n_yz_neg, cloud->points[j]) > margin
+       || distancePointToPlane(p_origin, n_yz_pos, cloud->points[j]) > margin)
       {
           cloud->points[j].x = std::numeric_limits<float>::quiet_NaN();
           cloud->points[j].y = std::numeric_limits<float>::quiet_NaN();
           cloud->points[j].z = std::numeric_limits<float>::quiet_NaN();
       }
       // Check if point respects the depth range limitations.
-      if (distancePointToPlane(p_min_range, n_min_range,
-              cloud->points[j]) > -margin
-      || distancePointToPlane(p_min_range, n_min_range,
-              cloud->points[j]) > -margin )
+      counter++;
+      if ( cloud->points[j].z < fov.min_depth_range - margin ||
+           cloud->points[j].z > fov.max_depth_range + margin )
       {
+        counter_nan++;
         cloud->points[j].x = std::numeric_limits<float>::quiet_NaN();
         cloud->points[j].y = std::numeric_limits<float>::quiet_NaN();
         cloud->points[j].z = std::numeric_limits<float>::quiet_NaN();

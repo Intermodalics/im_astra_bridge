@@ -79,11 +79,11 @@ int main(int argc, char **argv) {
   ros::Publisher cloud_pub = 
     n.advertise<sensor_msgs::PointCloud2>("depth/points", 1);
 
-  // Define the field of view
+  // Define the field of view (for the short range)
   fov_filter::field_of_view fov;
-  fov.angle_xz = M_PI * 30 / 180;
-  fov.angle_yz = M_PI * 30 / 180;
-  fov.min_depth_range = 0.4;
+  fov.angle_xz = M_PI * 60 / 180;
+  fov.angle_yz = M_PI * 50 / 180;
+  fov.min_depth_range = 0.3;
   fov.max_depth_range = 0.6;
 
   // Set the loop rate.
@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
     }
 
     // Remove points outside of the camera's field-of-view
-    fov_filter::removePointsOutsideFieldOfView(fov, 0.01, cloud);
+    fov_filter::removePointsOutsideFieldOfView(fov, 0.0, cloud);
 
     // Convert to sensormsg::Pointcloud2 type.
     RosPointCloud final_cloud (new sensor_msgs::PointCloud2);

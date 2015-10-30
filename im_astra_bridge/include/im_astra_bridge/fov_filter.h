@@ -19,6 +19,17 @@ struct field_of_view{
     double max_depth_range;
 };
 
+
+/**
+ * Calculates the distance from a point to a plane specified by a point on the
+ * plane and the normal of the plane. The distance is positive for points that
+ * ly on the side of the plane where the normal is pointing to.
+ *
+ * @param point_on_plane
+ * @param plane_normal
+ * @param point
+ * Return distance
+ */
 double distancePointToPlane(const KDL::Vector& point_on_plane,
                             const KDL::Vector& plane_normal,
                             const pcl::PointXYZRGB& point);
@@ -31,7 +42,7 @@ double distancePointToPlane(const KDL::Vector& point_on_plane,
  * outside of the field-of-view to NaN.
  *
  * @param fov
- * @param margin
+ * @param margin A positive margin increase the FOV region.
  * @param cloud
  */
 void removePointsOutsideFieldOfView(const field_of_view& fov,
