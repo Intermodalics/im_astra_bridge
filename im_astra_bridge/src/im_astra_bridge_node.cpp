@@ -83,6 +83,10 @@ class PointFrameListener : public astra::FrameReadyListener {
         ROS_ERROR_ONCE("The ir rgb color frame is not valid.");
       }
     }
+
+    /**
+     * Configuration of for depth stream. 
+     */
     astra::DepthStream configure_depth(astra::StreamReader& reader)
     {
       auto depthStream = reader.stream<astra::DepthStream>();
